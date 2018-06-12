@@ -17,6 +17,12 @@
             <td><%= urls[url] %></td>
             <td><%= `/u/${url}` %></td>
             <td><%- `<a href=/u/${url}>Link</a>` %></td>
+            <td>
+              <%- `<form action=/urls/${url}/delete method="POST"` %>
+                <label for="shortURL" ></label>
+                <button id="shortURL" type="submit" name="shortURL" <% `value=${url}` %> >Delete</button>
+              </form>
+            </td>
           </tr>
         <% }); %>
 
