@@ -58,6 +58,16 @@ app.post("/urls", (req, res) => {
   res.redirect(redirectURL);
 });
 
+//Add a POST route that removes a URL resource: POST /urls/:id/delete
+
+app.post("/urls/:id/delete", (req, res) => {
+  let shortURL = req.params.id;
+  delete urlDatabase[shortURL];
+  dbToDisk();
+  res.status(301);
+  res.redirect("/urls/");
+});
+
 app.get("/urls/:id", (req, res) => {
 
   let templateVars = {
@@ -73,6 +83,10 @@ app.get("/u/:shortURL", (req, res) => {
   res.status(301);
   res.redirect(longURL);
 });
+
+
+
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
