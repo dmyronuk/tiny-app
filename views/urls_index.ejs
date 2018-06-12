@@ -15,8 +15,8 @@
         <% Object.keys(urls).forEach(url => { %>
           <tr>
             <td><%= urls[url] %></td>
-            <td><%= `http://www.tinyapp.ca/${url}` %></td>
-            <td><a href="http://www.lighthouselabs.ca">Link</a></td>
+            <td><%= `/u/${url}` %></td>
+            <td><%- `<a href=/u/${url}>Link</a>` %></td>
           </tr>
         <% }); %>
 
