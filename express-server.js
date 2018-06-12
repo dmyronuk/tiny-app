@@ -41,8 +41,10 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // debug statement to see POST parameters
-  res.send("Ok");         // Respond with 'Ok' (we will replace this)
+  let shortURL = generateRandomString();
+  urlDatabase[shortURL] = req.body.longURL;
+  var redirectURL = `http://localhost:8080/urls/${shortURL}`;
+  res.redirect(redirectURL);
 });
 
 app.get("/urls/:id", (req, res) => {
@@ -56,7 +58,4 @@ app.get("/urls/:id", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
-  for(let i=0; i<50; i++){
-    console.log(generateRandomString())
-  }
 });
