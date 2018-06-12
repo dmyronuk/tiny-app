@@ -9,13 +9,18 @@
       <table>
         <tr>
           <th>URL</th>
-          <th>Short</th>
           <th>Link</th>
         </tr>
         <tr>
-          <td><%= shortURL %></td>
-          <td><%= longURL %></td>
+          <td>ShortURL: <%= shortURL %></td>
           <td><%- `<a href=/u/${shortURL}>Link</a>` %></td>
+          <td>
+                <form action=/urls/<%- shortURL %> method="POST">
+                <label for="newLongURL" class="hidden-label">Enter a new URL:</label>
+                <input id="newLongURL" type="text" name="newLongURL" placeholder="<%- longURL %>" style="width: 300px">
+                <input type="submit" value="Update">
+              </form>
+            </td>
         </tr>
       </table>
     </div>
