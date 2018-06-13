@@ -7,7 +7,7 @@
     <% include ./partials/_header.ejs %>
 
     <div id="main-container-mid">
-      <% if( username ){ %>
+      <% if( user_id ){ %>
         Please logout before creating a new account
       <% } else { %>
         <form action="/register" method="POST">

@@ -1,7 +1,7 @@
 <div id="top-bar">
   <div id = "login-info">
-    <% if(username){%>
-      Signed in as <%= username %>
+    <% if(user_id){%>
+      Signed in as <%= user_id %>
     <% } %>
   </div>
 
@@ -10,10 +10,10 @@
   </div>
 
   <div id="login-form-container">
-    <% if(username){%>
+    <% if(user_id){%>
       <form id="logout-form" action="/logout" method="post">
         <label for="username" aria-label="username"></label>
-          <input type="hidden" name="username" value="<%= username %>">
+          <input type="hidden" name="username" value="<%= user_id %>">
           <input id="logout-button" class="styled-button" type="submit" value="Logout">
       </form>
     <% }else{ %>
