@@ -1,4 +1,10 @@
 <div id="top-bar">
+  <div id = "login-info">
+    <% if(username){%>
+      Signed in as <%= username %>
+    <% } %>
+  </div>
+
   <div id="title-container">
     <a class="white-link" href="/urls" >TinyApp</a>
   </div>

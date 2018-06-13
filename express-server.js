@@ -45,12 +45,18 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {
+    username:req.cookies["username"],
+  }
+  res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {
@@ -75,17 +81,17 @@ app.get("/urls/:id", (req, res) => {
 
   let templateVars = {
     shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id]
+    longURL: urlDatabase[req.params.id],
+    username:req.cookies["username"]
   };
   res.render("urls_show", templateVars);
 });
 
 //Add a POST route that updates a URL resource; POST /urls/:id
 app.post("/urls/:id", (req, res) => {
-  console.log(req.body)
+
   let newLongURL = req.body.newLongURL;
   let shortURL = req.params.id
-  console.log("newLongURL, shortURL", newLongURL, shortURL);
   urlDatabase[req.params.id] = newLongURL;
   dbToDisk();
   res.status(301);

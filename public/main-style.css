@@ -35,7 +35,6 @@ a{
 }
 
 #top-bar{
-  height:75px;
   position:relative;
   width:calc(100% -20px);
   background:#00003f;
@@ -45,6 +44,7 @@ a{
   font-size:35px;
   padding:10px;
   font-family:Helvetica;
+  min-width:700px;
 }
 
 .white-link{
@@ -100,7 +100,6 @@ a{
 }
 
 #title-container{
-
 }
 
 #login-form-container{
@@ -111,4 +110,12 @@ a{
 
 #login-button{
   margin-auto;
+}
+
+#login-info{
+  color:white;
+  position:absolute;
+  font-size:18px;
+  left:10px;
+  bottom:15px;
 }
