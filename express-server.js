@@ -51,6 +51,15 @@ const dbToDisk = () => {
   });
 }
 
+const emailAlreadyExists = (database, newAddress) => {
+  for(key in database){
+    if(database[key]["email"] === newAddress){
+      return true
+    }
+  }
+  return false;
+}
+
 // const urlDatabase = {
 //   "b2xVn2": "http://www.lighthouselabs.ca",
 //   "9sm5xK": "http://www.google.com"
@@ -142,21 +151,26 @@ app.post("/register", (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
   let randId = generateRandomString();
-  res.cookie("username", randId)
 
-  let templateVars = {
-    username: randId,
-  };
+  if(!email || !password){
+    res.status(400).redirect("register");
 
-  users[randId] = {
-    id: randId,
-    email: email,
-    password: password,
+  }else if(emailAlreadyExists(users, email)){
+    res.status(400).redirect("register");
+
+  //new user passes validators
+  }else{
+    users[randId] = {
+      id: randId,
+      email: email,
+      password: password,
+    }
+    console.log(users)
+    res.cookie("username", randId)
+    let templateVars = {username: randId}
+    res.redirect("/urls/");
   }
-  console.log(users)
-
-  res.redirect("/urls/");
-})
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
