@@ -29,6 +29,11 @@ a{
   font-size:16px;
 }
 
+.styled-button:hover{
+  background:#e35146;
+  cursor: pointer;
+}
+
 #top-bar{
   width:calc(100% -20px);
   background:#00003f;
@@ -72,8 +77,19 @@ a{
   color:black;
 }
 
+.url-show-form{
+}
+
 .urls-show-th{
-  width:500px;
+  width:325px;
+}
+
+.url-show-label{
+  display:block;
+}
+
+#newLongURL{
+  width:205px;
 }
 
 .bold-url{
