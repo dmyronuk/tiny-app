@@ -9,19 +9,18 @@
       <div>
         <table>
           <tr>
-            <th>URL</th>
-            <th>Link</th>
+            <th class="urls-show-th">
+              <%- `<a class="urls-show-big-link" href=/u/${shortURL}>ShortURL: <span class="bold-url">${shortURL}</span></a>` %>
+            </th>
           </tr>
           <tr>
-            <td><%= shortURL %></td>
-            <td><%- `<a href=/u/${shortURL}>${longURL}</a>` %></td>
             <td>
-                  <form action=/urls/<%- shortURL %> method="POST">
-                  <label for="newLongURL" class="hidden-label">Enter a new URL:</label>
-                  <input type="submit" class="styled-button" value="Update">
-                  <input id="newLongURL" type="text" name="newLongURL" placeholder="<%- longURL %>">
-                </form>
-              </td>
+              <form action=/urls/<%- shortURL %> method="POST">
+              <label for="newLongURL" class="hidden-label">Enter a new URL:</label>
+              <input id="newLongURL" type="text" name="newLongURL" placeholder="<%- longURL %>">
+              <input type="submit" class="styled-button" value="Update">
+              </form>
+            </td>
           </tr>
         </table>
       </div>

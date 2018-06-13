@@ -37,6 +37,9 @@ a{
   font-size:35px;
   padding:10px;
   font-family:Helvetica;
+}
+
+.white-link{
   color:white;
 }
 
@@ -59,3 +62,15 @@ a{
   display:block;
 }
 
+.urls-show-big-link{
+  font-size:35px;
+  color:black;
+}
+
+.urls-show-th{
+  width:500px;
+}
+
+.bold-url{
+  font-weight:black;
+}
