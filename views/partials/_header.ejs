@@ -1,7 +1,7 @@
 <div id="top-bar">
   <div id = "login-info">
-    <% if(username){%>
-      Signed in as <%= username %>
+    <% if(user_id){%>
+      Signed in as <%= user_id %>
     <% } %>
   </div>
 
@@ -9,19 +9,21 @@
     <a class="white-link" href="/urls" >TinyApp</a>
   </div>
 
-  <div id="login-form-container">
-    <% if(username){%>
-      <form id="logout-form" action="/logout" method="post">
-        <label for="username" aria-label="username"></label>
-          <input type="hidden" name="username" value="<%= username %>">
-          <input id="logout-button" class="styled-button" type="submit" value="Logout">
+  <div id="nav-login-form-container">
+    <% if(user_id){%>
+      <form id="nav-logout-form" action="/logout" method="post">
+        <label for="user_id" aria-label="user_id"></label>
+          <input type="hidden" name="user_id" value="<%= user_id %>">
+          <input id="nav-logout-button" class="styled-button" type="submit" value="Logout">
       </form>
     <% }else{ %>
-      <form id="login-form" action="/login" method="post">
-        <label for="username" aria-label="username"></label>
-          <input type="text" name="username" placeholder="username">
-          <input id="login-button" class="styled-button" type="submit" value="Login">
-      </form>
+      <a href="/login">
+        <div class="styled-button">Login</div>
+      </a>
+      <a href="/register">
+        <div class="styled-button">Register</div>
+      </a>
+
     <% } %>
   </div>
 </div>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <% include partials/_head %>
+  </head>
+  <body>
+    <% include ./partials/_header.ejs %>
+
+    <div id="main-container-mid">
+      <% if( user_id ){ %>
+        Please logout before creating a new account
+      <% } else { %>
+        <form action="/register" method="POST">
+          <div id="sign-up">
+            Sign Up
+          </div>
+          <label for="email" aria-label="email"></label>
+          <input id="email" class="block-input-field" type="text" name="email" placeholder="email address">
+          <label for="password" aria-label="password"></label>
+          <input id="password" class="block-input-field" type="password" name="password" placeholder="password">
+          <input type="submit" id="register-button" class="styled-button" value="Register">
+        </form>
+      <% } %>
+    </div>
+  </body>
+</html>
