@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <% include ./partials/_header.ejs %>
+    <% include ./partials/_head.ejs %>
   </head>
   <body>
-    <% include ./partials/_nav-top.ejs %>
+    <% include ./partials/_header.ejs %>
     <div id="main-container-mid">
       <div>
         <table>
@@ -15,10 +15,10 @@
           </tr>
           <tr>
             <td>
-              <form action=/urls/<%- shortURL %> method="POST">
-              <label for="newLongURL" class="hidden-label">Enter a new URL:</label>
-              <input id="newLongURL" type="text" name="newLongURL" placeholder="<%- longURL %>">
-              <input type="submit" class="styled-button" value="Update">
+              <form class="url-show-form" action=/urls/<%- shortURL %> method="POST">
+                <label class="url-show-label" for="newLongURL" class="hidden-label">Enter a new URL:</label>
+                <input id="newLongURL" type="text" name="newLongURL" placeholder="<%- longURL %>">
+                <input type="submit" class="styled-button" value="Update">
               </form>
             </td>
           </tr>

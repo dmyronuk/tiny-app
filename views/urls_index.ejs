@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <% include ./partials/_header.ejs %>
+    <% include ./partials/_head.ejs %>
   </head>
   <body>
-    <% include ./partials/_nav-top.ejs %>
+    <% include ./partials/_header.ejs %>
 
     <div id="main-container-mid">
 
@@ -17,7 +17,7 @@
             <td><%- `<a href=/u/${url}>${urls[url]}</a>` %></td>
             <td class="edit-td"><%- `<a href=/urls/${url}>Edit</a>` %></td>
             <td>
-                <form action=/urls/<%= url %>/delete method="POST"%>
+                <form action=/urls/<%= url %>/delete method="POST">
                 <label for="shortURL" aria-label="Delete"></label>
                 <button id="shortURL" class="styled-button" type="submit" name="shortURL" <% `value=${url}` %> >Delete</button>
               </form>

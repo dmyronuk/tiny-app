@@ -4,8 +4,10 @@ const PORT = 8080;
 const fs = require("fs");
 const urlDatabase = require("./app-db.json");
 const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 app.use(express.static(__dirname + '/public'));
 app.set("view engine", "ejs");
 
@@ -43,12 +45,18 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
+  let templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
   res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  let templateVars = {
+    username:req.cookies["username"],
+  }
+  res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {
@@ -73,17 +81,17 @@ app.get("/urls/:id", (req, res) => {
 
   let templateVars = {
     shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id]
+    longURL: urlDatabase[req.params.id],
+    username:req.cookies["username"]
   };
   res.render("urls_show", templateVars);
 });
 
 //Add a POST route that updates a URL resource; POST /urls/:id
 app.post("/urls/:id", (req, res) => {
-  console.log(req.body)
+
   let newLongURL = req.body.newLongURL;
   let shortURL = req.params.id
-  console.log("newLongURL, shortURL", newLongURL, shortURL);
   urlDatabase[req.params.id] = newLongURL;
   dbToDisk();
   res.status(301);
@@ -97,8 +105,15 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+app.post("/login", (req, res) => {
+  res.cookie("username", req.body.username)
+  res.redirect("/urls/");
+})
 
-
+app.post("/logout", (req, res) => {
+  res.clearCookie("username");
+  res.redirect("/urls/");
+})
 
 
 app.listen(PORT, () => {
