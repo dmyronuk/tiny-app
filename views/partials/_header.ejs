@@ -10,10 +10,18 @@
   </div>
 
   <div id="login-form-container">
-    <form id="login-form" action="/login" method="post">
-      <label for="username" aria-label="username"></label>
-        <input type="text" name="username" placeholder="username">
-        <input id="login-button" class="styled-button" type="submit" value="Login">
-    </form>
+    <% if(username){%>
+      <form id="logout-form" action="/logout" method="post">
+        <label for="username" aria-label="username"></label>
+          <input type="hidden" name="username" value="<%= username %>">
+          <input id="logout-button" class="styled-button" type="submit" value="Logout">
+      </form>
+    <% }else{ %>
+      <form id="login-form" action="/login" method="post">
+        <label for="username" aria-label="username"></label>
+          <input type="text" name="username" placeholder="username">
+          <input id="login-button" class="styled-button" type="submit" value="Login">
+      </form>
+    <% } %>
   </div>
 </div>
