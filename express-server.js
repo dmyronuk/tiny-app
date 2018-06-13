@@ -53,11 +53,21 @@ const dbToDisk = () => {
 
 const emailAlreadyExists = (database, newAddress) => {
   for(key in database){
+    console.log(database[key]["email"], newAddress)
     if(database[key]["email"] === newAddress){
       return true
     }
   }
   return false;
+}
+
+const getUserFromEmail = (database, email) => {
+  for(key in database){
+    if(database[key]["email"] === email){
+      return key
+    }
+  }
+  console.log("Error: email address not found")
 }
 
 // const urlDatabase = {
@@ -130,8 +140,14 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+app.get("/login", (req, res) => {
+  templateVars = {user_id: req.cookies.user_id};
+  res.render("login", templateVars);
+})
+
 app.post("/login", (req, res) => {
-  res.cookie("user_id", req.body.username)
+  let user_id = getUserFromEmail(users, req.body.email);
+  res.cookie("user_id", user_id)
   res.redirect("/urls/");
 })
 
