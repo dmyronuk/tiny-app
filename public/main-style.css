@@ -11,6 +11,10 @@ td {
   padding:10px;
 }
 
+.edit-td{
+  width:30px;
+}
+
 a{
   text-decoration:none;
 }

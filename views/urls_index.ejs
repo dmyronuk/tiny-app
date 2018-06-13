@@ -10,16 +10,15 @@
 
       <table>
         <tr>
-          <th>URL</th>
           <th>Short</th>
           <th>Link</th>
         </tr>
 
         <% Object.keys(urls).forEach(url => { %>
           <tr>
-            <td><%= urls[url] %></td>
-            <td><%= `/u/${url}` %></td>
-            <td><%- `<a href=/u/${url}>Link</a>` %></td>
+            <td><%= url %></td>
+            <td><%- `<a href=/u/${url}>${urls[url]}</a>` %></td>
+            <td class="edit-td"><%- `<a href=/urls/${url}>Edit</a>` %></td>
             <td>
                 <form action=/urls/<%= url %>/delete method="POST"%>
                 <label for="shortURL" aria-label="Delete"></label>
