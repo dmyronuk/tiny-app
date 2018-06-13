@@ -7,8 +7,8 @@ html, body{
 
 td {
   width:100px;
-  text-align:center;
   padding:10px;
+  vertical-align: middle;
 }
 
 .edit-td{
@@ -54,8 +54,13 @@ a{
   justify-content:center;
 }
 
-.hidden-label{
-  display:none;
+#arrow-icon{
+  height:30px;
+  width:30px;
+}
+
+.arrow-icon-td{
+  width:40px;
 }
 
 #shortURL {

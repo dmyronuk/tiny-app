@@ -9,14 +9,11 @@
     <div id="main-container-mid">
 
       <table>
-        <tr>
-          <th>Short</th>
-          <th>Link</th>
-        </tr>
 
         <% Object.keys(urls).forEach(url => { %>
           <tr>
             <td><%= url %></td>
+            <td class="arrow-icon-td"><img id="arrow-icon" src="/arrow.png"/></td>
             <td><%- `<a href=/u/${url}>${urls[url]}</a>` %></td>
             <td class="edit-td"><%- `<a href=/urls/${url}>Edit</a>` %></td>
             <td>
