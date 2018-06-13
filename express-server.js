@@ -11,7 +11,23 @@ app.use(cookieParser());
 app.use(express.static(__dirname + '/public'));
 app.set("view engine", "ejs");
 
-
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  },
+  "Walter": {
+    id: "fakeId",
+    email: "walter@disney.com",
+    password: "goodpassword"
+  }
+}
 
 const generateRandomString = () => {
   let outStr = ""
@@ -123,6 +139,22 @@ app.get("/register", (req, res) => {
 })
 
 app.post("/register", (req, res) => {
+  let email = req.body.email;
+  let password = req.body.password;
+  let randId = generateRandomString();
+  res.cookie("username", randId)
+
+  let templateVars = {
+    username: randId,
+  };
+
+  users[randId] = {
+    id: randId,
+    email: email,
+    password: password,
+  }
+  console.log(users)
+
   res.redirect("/urls/");
 })
 
