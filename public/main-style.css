@@ -109,7 +109,7 @@ a{
 }
 
 #login-button{
-  margin-auto;
+  margin:auto;
 }
 
 #login-info{
@@ -118,4 +118,21 @@ a{
   font-size:18px;
   left:10px;
   bottom:15px;
+}
+
+.block-input-field{
+  display:block;
+  margin-bottom:10px;
+}
+
+#register-button{
+  width:100%;
+  margin:0;
+}
+
+#sign-up{
+  text-align:center;
+  margin-bottom:10px;
+  font-size:25px;
+  font-weight:bold;
 }
