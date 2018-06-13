@@ -4,8 +4,10 @@ const PORT = 8080;
 const fs = require("fs");
 const urlDatabase = require("./app-db.json");
 const bodyParser = require("body-parser");
+const cookieParser = require('cookie-parser');
 
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cookieParser());
 app.use(express.static(__dirname + '/public'));
 app.set("view engine", "ejs");
 
