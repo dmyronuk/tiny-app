@@ -2,10 +2,11 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 const fs = require("fs");
-const urlDatabase = require("./app-db.json")
+const urlDatabase = require("./app-db.json");
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({extended: true}));
 
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.static(__dirname + '/public'));
 app.set("view engine", "ejs");
 
 

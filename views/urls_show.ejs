@@ -4,25 +4,27 @@
     <% include ./partials/_header.ejs %>
   </head>
   <body>
-    <div>
-
-      <table>
-        <tr>
-          <th>URL</th>
-          <th>Link</th>
-        </tr>
-        <tr>
-          <td>ShortURL: <%= shortURL %></td>
-          <td><%- `<a href=/u/${shortURL}>Link</a>` %></td>
-          <td>
-                <form action=/urls/<%- shortURL %> method="POST">
-                <label for="newLongURL" class="hidden-label">Enter a new URL:</label>
-                <input id="newLongURL" type="text" name="newLongURL" placeholder="<%- longURL %>" style="width: 300px">
-                <input type="submit" value="Update">
-              </form>
-            </td>
-        </tr>
-      </table>
+    <% include ./partials/_nav-top.ejs %>
+    <div id="main-container-mid">
+      <div>
+        <table>
+          <tr>
+            <th>URL</th>
+            <th>Link</th>
+          </tr>
+          <tr>
+            <td><%= shortURL %></td>
+            <td><%- `<a href=/u/${shortURL}>${longURL}</a>` %></td>
+            <td>
+                  <form action=/urls/<%- shortURL %> method="POST">
+                  <label for="newLongURL" class="hidden-label">Enter a new URL:</label>
+                  <input type="submit" class="styled-button" value="Update">
+                  <input id="newLongURL" type="text" name="newLongURL" placeholder="<%- longURL %>">
+                </form>
+              </td>
+          </tr>
+        </table>
+      </div>
     </div>
   </body>
 </html>
