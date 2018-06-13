@@ -53,7 +53,6 @@ const dbToDisk = () => {
 
 const emailAlreadyExists = (database, newAddress) => {
   for(key in database){
-    console.log(database[key]["email"], newAddress)
     if(database[key]["email"] === newAddress){
       return true
     }
@@ -70,6 +69,11 @@ const getUserFromEmail = (database, email) => {
   console.log("Error: email address not found")
 }
 
+//returns true if password is valid
+const validatePassword = (database, user_id, password) => {
+  return database[user_id]["password"] === password;
+}
+
 // const urlDatabase = {
 //   "b2xVn2": "http://www.lighthouselabs.ca",
 //   "9sm5xK": "http://www.google.com"
@@ -77,6 +81,16 @@ const getUserFromEmail = (database, email) => {
 
 app.get("/", (req, res) => {
   res.end("Hello!");
+});
+
+app.get("/403", (req, res) => {
+  templateVars = {user_id: req.cookies.user_id};
+  res.render("403", templateVars);
+});
+
+app.get("/404", (req, res) => {
+  templateVars = {user_id: req.cookies.user_id};
+  res.render("404", templateVars);
 });
 
 app.get("/urls", (req, res) => {
@@ -143,25 +157,33 @@ app.get("/u/:shortURL", (req, res) => {
 app.get("/login", (req, res) => {
   templateVars = {user_id: req.cookies.user_id};
   res.render("login", templateVars);
-})
+});
 
+//logic is a bit redundant - fix later if time
 app.post("/login", (req, res) => {
   let user_id = getUserFromEmail(users, req.body.email);
-  res.cookie("user_id", user_id)
-  res.redirect("/urls/");
-})
+
+  if(user_id){
+    let passwordIsValid = validatePassword(users, user_id, req.body.password);
+    if(passwordIsValid){
+      res.cookie("user_id", user_id);
+      res.redirect("/");
+    }
+  }
+  res.status(403).redirect("403");
+});
 
 app.post("/logout", (req, res) => {
   res.clearCookie("user_id");
   res.redirect("/urls/");
-})
+});
 
 app.get("/register", (req, res) => {
   let templateVars = {
     user_id: req.cookies.user_id
   };
   res.render("register", templateVars)
-})
+});
 
 app.post("/register", (req, res) => {
   let email = req.body.email;
