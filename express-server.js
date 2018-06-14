@@ -97,6 +97,14 @@ const urlBelongsToUser = (users, user_id, shortURL) => {
   }, false)
 };
 
+const getUserUrls = (users, urlDatabase, user_id) => {
+  let curUserObj = users[user_id];
+  return curUserObj.urls.reduce((acc, cur) => {
+    acc[cur] = urlDatabase[cur];
+    return acc
+  }, {})
+}
+
 //deletes the link between a user and a url
 const removeUserURL = (users, user_id, shortURL) => {
   let urlArr = users[user_id]["urls"];
@@ -129,8 +137,15 @@ app.get("/404", (req, res) => {
 
 //get list of urls
 app.get("/urls", (req, res) => {
+  let user_id = req.cookies.user_id;
+  let urls = user_id ? getUserUrls(users, urlDatabase, user_id) : {};
+  let urlsLength = Object.keys(urls).length;
+  //Boolean used as a flag in the template to display a message
+  let userHasNoUrls = urlsLength === 0;
+
   let templateVars = {
-    urls: urlDatabase,
+    urls: urls,
+    userHasNoUrls: userHasNoUrls,
     user_id: req.cookies.user_id
   };
   res.render("urls_index", templateVars);

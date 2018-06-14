@@ -63,6 +63,25 @@ a{
   justify-content:center;
 }
 
+
+#no-urls-div{
+}
+
+#nothing-here-heading{
+  margin:auto;
+  font-size:40px;
+  font-weight:bold;
+  text-align:center;
+  margin-bottom:5px;
+}
+
+.no-url-link{
+  font-size:17px;
+  margin:auto;
+  text-align:center;
+}
+
+
 #arrow-icon{
   height:30px;
   width:30px;

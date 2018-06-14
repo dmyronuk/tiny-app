@@ -8,8 +8,35 @@
 
     <div id="main-container-mid">
 
-      <table>
+      <% if(userHasNoUrls){ %>
+        <div id="no-urls-div">
+          <div id ="nothing-here-heading">
+            Nothing Here!
+          </div>
 
+          <!-- user is logged in and can add urls  -->
+          <% if(user_id){ %>
+            <div class="no-url-link">
+              <a href="/urls/new">
+                Add A New URL
+              </a>
+            </div>
+
+          <!-- user is not logged in  -->
+          <% } else { %>
+
+            <div class="no-url-link">
+              <a href="/login">
+                Sign in to get started
+              </a>
+            </div>
+
+          <% }; %>
+
+        </div>
+      <% }; %>
+
+      <table>
         <% Object.keys(urls).forEach(url => { %>
           <tr>
             <td><%= url %></td>
