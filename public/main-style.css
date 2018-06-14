@@ -25,8 +25,21 @@ a{
   border:none;
   border-radius:5px;
   margin:5px;
-  padding:5px 10px 5px 10px;
+  padding:5px 0px 5px 0px;
+  width:80px;
   font-size:16px;
+}
+
+#add-url-button{
+  background:#0057e7;
+}
+
+#add-url-button:hover{
+  background:#7fabf3;
+}
+
+#add-url-button a{
+  color:white;
 }
 
 .styled-button:hover{
@@ -81,6 +94,10 @@ a{
   text-align:center;
 }
 
+.add-url-link{
+  background:#0057e7;
+  width:800px;
+}
 
 #arrow-icon{
   height:30px;

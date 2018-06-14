@@ -3,39 +3,41 @@ const app = express();
 const PORT = 8080;
 const fs = require("fs");
 const bodyParser = require("body-parser");
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const bcrypt = require("bcrypt");
+const methodOverride = require("method-override");
 
 //Decided to save the dbs to disk so that changes wouldn't be whiped every server restart
-const users = require("./user-db.json")
+const users = require("./user-db.json");
 const urlDatabase = require("./app-db.json");
 
+app.use(methodOverride('_method'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
-  name: 'session',
+  name: "session",
   keys: ["supersecret"],
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }))
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
 
 // const users = {
 //   "userRandomID": {
 //     id: "userRandomID",
 //     email: "user@example.com",
-//     password: "$2b$10$fxrcS0SsOrsaRwxxgN6s/Os0obNAXHlIHuLh9gLr3scGl2tBL4yj",  ---> purple-monkey-dinosaur
+//     password: "$2b$10$fxrcS0SsOrsaRwxxgN6s/Os0obNAXHlIHuLh9gLr3scGl2tBL4yj",
 //     urls: ["TaEMFI"]
 //   },
 //  "user2RandomID": {
 //     id: "user2RandomID",
 //     email: "user2@example.com",
-//     password: "$2b$10$xXa5UovQ1aalgdbOf61Kr.pnl1GCMQHimoRl4umMM.bfZjVFY1CJ", ---> dishwasher-funk
+//     password: "$2b$10$xXa5UovQ1aalgdbOf61Kr.pnl1GCMQHimoRl4umMM.bfZjVFY1CJ",
 //     urls: []
 //   },
 //   "Walter": {
 //     id: "fakeId",
 //     email: "walter@disney.com",
-//     password: "$2b$10$5NK/M0274su8TXpwxMcdq.le5dfkYJiil59dWm6SGllrbQ3qlYTx2", ---> goodpassword
+//     password: "$2b$10$5NK/M0274su8TXpwxMcdq.le5dfkYJiil59dWm6SGllrbQ3qlYTx2",
 //     urls: ["b2xVn2", "9sm5xK"]
 //   }
 // }
@@ -99,12 +101,7 @@ const validatePassword = (database, user_id, plaintextPassword) => {
 };
 
 const urlExists = (urls, shortURL) => {
-  return Object.keys(urls).reduce((acc, cur) => {
-    if(cur === shortURL){
-      acc = true;
-    }
-    return acc;
-  }, false)
+  return urls.hasOwnProperty(shortURL);
 };
 
 const urlBelongsToUser = (users, user_id, shortURL) => {
@@ -183,6 +180,7 @@ app.get("/urls/new", (req, res) => {
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
   let user_id = req.session.user_id;
+  console.log(user_id)
 
   if(user_id){
     users[user_id].urls.push(shortURL);
@@ -197,11 +195,11 @@ app.post("/urls", (req, res) => {
 });
 
 //Add a POST route that removes a URL resource: POST /urls/:id/delete
-app.post("/urls/:id/delete", (req, res) => {
+//Override as DELETE request method
+app.delete("/urls/:id/delete", (req, res) => {
   let shortURL = req.params.id;
   let user_id = req.session.user_id;
 
-  let
   //if url doesn't exist, 404 it
   if(! urlExists(urlDatabase, shortURL)){
     res.status(404).redirect("/404");
@@ -239,7 +237,7 @@ app.get("/urls/:id", (req, res) => {
 });
 
 //Edit existing url
-app.post("/urls/:id", (req, res) => {
+app.put("/urls/:id", (req, res) => {
 
   //If user is logged in then they can edit
   if(req.session.user_id){
