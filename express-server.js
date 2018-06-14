@@ -4,6 +4,7 @@ const PORT = 8080;
 const fs = require("fs");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcrypt");
 
 //Decided to save the dbs to disk so that changes wouldn't be whiped every server restart
 const users = require("./user-db.json")
@@ -18,19 +19,19 @@ app.set("view engine", "ejs");
 //   "userRandomID": {
 //     id: "userRandomID",
 //     email: "user@example.com",
-//     password: "purple-monkey-dinosaur",
+//     password: "$2b$10$fxrcS0SsOrsaRwxxgN6s/Os0obNAXHlIHuLh9gLr3scGl2tBL4yj",  ---> purple-monkey-dinosaur
 //     urls: ["TaEMFI"]
 //   },
 //  "user2RandomID": {
 //     id: "user2RandomID",
 //     email: "user2@example.com",
-//     password: "dishwasher-funk",
+//     password: "$2b$10$xXa5UovQ1aalgdbOf61Kr.pnl1GCMQHimoRl4umMM.bfZjVFY1CJ", ---> dishwasher-funk
 //     urls: []
 //   },
 //   "Walter": {
 //     id: "fakeId",
 //     email: "walter@disney.com",
-//     password: "goodpassword",
+//     password: "$2b$10$5NK/M0274su8TXpwxMcdq.le5dfkYJiil59dWm6SGllrbQ3qlYTx2", ---> goodpassword
 //     urls: ["b2xVn2", "9sm5xK"]
 //   }
 // }
@@ -88,8 +89,9 @@ const getUserFromEmail = (database, email) => {
 };
 
 //returns true if password is valid
-const validatePassword = (database, user_id, password) => {
-  return database[user_id]["password"] === password;
+const validatePassword = (database, user_id, plaintextPassword) => {
+  let hashedPassword = database[user_id]["password"];
+  return bcrypt.compareSync(plaintextPassword, hashedPassword);
 };
 
 const urlExists = (urls, shortURL) => {
@@ -128,7 +130,6 @@ const removeUserURL = (users, user_id, shortURL) => {
     }
   })
 };
-
 
 app.get("/", (req, res) => {
   templateVars = {user_id: req.cookies.user_id};
@@ -301,20 +302,24 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
-  let randId = generateRandomString();
 
+  //email or password are missing
   if(!email || !password){
     res.status(400).redirect("register");
 
+  //email already exists in database
   }else if(emailAlreadyExists(users, email)){
-    res.status(400).redirect("register");
+    res.status(403).redirect("register");
 
   //new user passes validators
   }else{
+    let randId = generateRandomString();
+    let hashedPassword = bcrypt.hashSync(password, 10);
+
     users[randId] = {
       id: randId,
       email: email,
-      password: password,
+      password: hashedPassword,
       urls:[],
     }
     usersToDisk();
