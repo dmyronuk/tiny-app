@@ -250,6 +250,7 @@ app.put("/urls/:id", (req, res) => {
       dbToDisk();
       res.status(301).redirect("/urls/");
     } else {
+      //url does not belong to user
       let templateVars = {user_id: req.session.user_id};
       res.status(403).redirect("/403");
     }
@@ -282,11 +283,14 @@ app.post("/login", (req, res) => {
       req.session.user_id = user_id
       //res.cookie("user_id", user_id);
       res.redirect("/");
+
+    //invalid password
     }else{
-      res.redirect(403, "403");
+      res.status(401).redirect("/login");
     }
+  //user does not exist
   }else{
-    res.status(403).redirect("403");
+    res.status(401).redirect("/login");
   }
 });
 
@@ -299,7 +303,7 @@ app.get("/register", (req, res) => {
   let templateVars = {
     user_id: req.session.user_id
   };
-  res.render("register", templateVars);
+  res.render("/register", templateVars);
 });
 
 app.post("/register", (req, res) => {
@@ -308,11 +312,11 @@ app.post("/register", (req, res) => {
 
   //email or password are missing
   if(!email || !password){
-    res.status(400).redirect("register");
+    res.status(400).redirect("/register");
 
   //email already exists in database
   }else if(emailAlreadyExists(users, email)){
-    res.status(403).redirect("register");
+    res.status(403).redirect("/register");
 
   //new user passes validators
   }else{
