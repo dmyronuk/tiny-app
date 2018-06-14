@@ -2,3 +2,4 @@ node_modules
 app-db.json
 notes.txt
 tiny-app.sublime-workspace
+createJSON.js
