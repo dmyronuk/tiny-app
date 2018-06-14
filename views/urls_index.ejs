@@ -34,33 +34,33 @@
           <% }; %>
 
         </div>
-      <% }; %>
 
-      <table>
-        <% Object.keys(urls).forEach(url => { %>
-          <tr>
-            <td><%= url %></td>
-            <td class="arrow-icon-td"><img id="arrow-icon" src="/arrow.png"/></td>
-            <td><a href=/u/<%= url %>><%= urls[url] %></a></td>
-            <td class="edit-td"><%- `<a href=/urls/${url}>Edit</a>` %></td>
-            <td>
-                <form action="/urls/<%= url %>/delete?_method=DELETE"" method="POST">
-                <label for="shortURL" aria-label="Delete"></label>
-                <button id="shortURL" class="styled-button" type="submit" name="shortURL" value="<%= url %>">Delete</button>
-              </form>
-            </td>
-          </tr>
-          <tr>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td><button id="add-url-button" class="styled-button"><a href="/urls/new">Add URL</a></button></td>
-          </tr>
-        <% }); %>
+      <% } else if(user_id){ %>
+        <table>
+          <% Object.keys(urls).forEach(url => { %>
+            <tr>
+              <td><%= url %></td>
+              <td class="arrow-icon-td"><img id="arrow-icon" src="/arrow.png"/></td>
+              <td><a href=/u/<%= url %>><%= urls[url] %></a></td>
+              <td class="edit-td"><%- `<a href=/urls/${url}>Edit</a>` %></td>
+              <td>
+                  <form action="/urls/<%= url %>/delete?_method=DELETE"" method="POST">
+                  <label for="shortURL" aria-label="Delete"></label>
+                  <button id="shortURL" class="styled-button" type="submit" name="shortURL" value="<%= url %>">Delete</button>
+                </form>
+              </td>
+            </tr>
 
-      </table>
-
+          <% }); %>
+            <tr>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td><button id="add-url-button" class="styled-button"><a href="/urls/new">Add URL</a></button></td>
+            </tr>
+        </table>
+      <% } %>
     </div>
   </body>
 </html>
