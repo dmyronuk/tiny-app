@@ -2,32 +2,38 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 const fs = require("fs");
-const urlDatabase = require("./app-db.json");
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+
+//Decided to save the dbs to disk so that changes wouldn't be whiped every server restart
+const users = require("./user-db.json")
+const urlDatabase = require("./app-db.json");
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.use(express.static(__dirname + '/public'));
 app.set("view engine", "ejs");
 
-const users = {
-  "userRandomID": {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: "purple-monkey-dinosaur"
-  },
- "user2RandomID": {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: "dishwasher-funk"
-  },
-  "Walter": {
-    id: "fakeId",
-    email: "walter@disney.com",
-    password: "goodpassword"
-  }
-}
+// const users = {
+//   "userRandomID": {
+//     id: "userRandomID",
+//     email: "user@example.com",
+//     password: "purple-monkey-dinosaur",
+//     urls: []
+//   },
+//  "user2RandomID": {
+//     id: "user2RandomID",
+//     email: "user2@example.com",
+//     password: "dishwasher-funk",
+//     urls: []
+//   },
+//   "Walter": {
+//     id: "fakeId",
+//     email: "walter@disney.com",
+//     password: "goodpassword",
+//     urls: ["b2xVn2", "9sm5xK"]
+//   }
+// }
 
 const generateRandomString = () => {
   let outStr = ""
@@ -47,9 +53,16 @@ const generateRandomString = () => {
 const dbToDisk = () => {
   let outJSON = JSON.stringify(urlDatabase)
   fs.writeFile("./app-db.json", outJSON, () => {
-    console.log("Database Updated On Disk")
+    console.log("URL Database Updated On Disk")
   });
-}
+};
+
+const usersToDisk = () => {
+  let outJSON = JSON.stringify(users)
+  fs.writeFile("./user-db.json", outJSON, () => {
+    console.log("User Database Updated On Disk")
+  });
+};
 
 const emailAlreadyExists = (database, newAddress) => {
   for(key in database){
@@ -58,7 +71,7 @@ const emailAlreadyExists = (database, newAddress) => {
     }
   }
   return false;
-}
+};
 
 const getUserFromEmail = (database, email) => {
   for(key in database){
@@ -67,12 +80,32 @@ const getUserFromEmail = (database, email) => {
     }
   }
   console.log("Error: email address not found")
-}
+};
 
 //returns true if password is valid
 const validatePassword = (database, user_id, password) => {
   return database[user_id]["password"] === password;
-}
+};
+
+const urlBelongsToUser = (users, user_id, shortURL) => {
+  let userObj = users[user_id];
+  return userObj.urls.reduce((acc, elem) => {
+    if(elem === shortURL){
+      acc = true;
+    }
+    return acc;
+  }, false)
+};
+
+//deletes the link between a user and a url
+const removeUserURL = (users, user_id, shortURL) => {
+  let urlArr = users[user_id]["urls"];
+  urlArr.forEach((elem, i) => {
+    if(elem === shortURL){
+      urlArr.splice(i, 1);
+    }
+  })
+};
 
 // const urlDatabase = {
 //   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -80,7 +113,8 @@ const validatePassword = (database, user_id, password) => {
 // };
 
 app.get("/", (req, res) => {
-  res.end("Hello!");
+  templateVars = {user_id: req.cookies.user_id};
+  res.render("home", templateVars);
 });
 
 app.get("/403", (req, res) => {
@@ -93,6 +127,7 @@ app.get("/404", (req, res) => {
   res.render("404", templateVars);
 });
 
+//get list of urls
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
@@ -101,6 +136,7 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+//form to create new short urls
 app.get("/urls/new", (req, res) => {
   let templateVars = {
     user_id:req.cookies.user_id,
@@ -108,24 +144,42 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
+//post to create new short url
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  urlDatabase[shortURL] = req.body.longURL;
-  dbToDisk();
-  var redirectURL = `http://localhost:8080/urls/${shortURL}`;
-  res.redirect(redirectURL);
-});
+  let user_id = req.cookies.user_id;
 
+  if(user_id){
+    users[user_id].urls.push(shortURL);
+    urlDatabase[shortURL] = req.body.longURL;
+    dbToDisk();
+    usersToDisk();
+    var redirectURL = `http://localhost:8080/urls/${shortURL}`;
+    res.redirect(redirectURL);
+  }else{
+    res.status(403).redirect("/login");
+  }
+});
 
 //Add a POST route that removes a URL resource: POST /urls/:id/delete
 app.post("/urls/:id/delete", (req, res) => {
   let shortURL = req.params.id;
-  delete urlDatabase[shortURL];
-  dbToDisk();
-  res.status(301);
-  res.redirect("/urls/");
+  let user_id = req.cookies.user_id;
+
+  //if user is logged in they can delete
+  if(user_id && urlBelongsToUser(users, user_id, shortURL)){
+    delete urlDatabase[shortURL];
+    removeUserURL(users, user_id, shortURL);
+    dbToDisk();
+    usersToDisk();
+    res.status(301).redirect("/urls/");
+  }else{
+    let templateVars = {user_id: req.cookies.user_id};
+    res.status(403).redirect("403", templateVars);
+  }
 });
 
+//Display single url info
 app.get("/urls/:id", (req, res) => {
 
   let templateVars = {
@@ -136,17 +190,30 @@ app.get("/urls/:id", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-//Add a POST route that updates a URL resource; POST /urls/:id
+//Edit existing url
 app.post("/urls/:id", (req, res) => {
 
-  let newLongURL = req.body.newLongURL;
-  let shortURL = req.params.id
-  urlDatabase[req.params.id] = newLongURL;
-  dbToDisk();
-  res.status(301);
-  res.redirect("/urls/");
+  //If user is logged in then they can edit
+  if(req.cookies.user_id){
+    if(urlBelongsToUser(users, req.cookies.user_id, req.params.id)){
+      let newLongURL = req.body.newLongURL;
+      let shortURL = req.params.id;
+      urlDatabase[shortURL] = newLongURL;
+
+      //update the urls but we don't need to update users on disk because the url_id is unchanged
+      dbToDisk();
+      res.status(301).redirect("/urls/");
+    } else {
+      let templateVars = {user_id: req.cookies.user_id};
+      res.status(403).redirect("/403");
+    }
+  } else {
+    let templateVars = {user_id: req.cookies.user_id};
+    res.status(403).redirect("/403");
+  }
 });
 
+//redirects short url to long url
 app.get("/u/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL;
   let longURL = urlDatabase[shortURL];
@@ -155,7 +222,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  templateVars = {user_id: req.cookies.user_id};
+  let templateVars = {user_id: req.cookies.user_id};
   res.render("login", templateVars);
 });
 
@@ -168,9 +235,12 @@ app.post("/login", (req, res) => {
     if(passwordIsValid){
       res.cookie("user_id", user_id);
       res.redirect("/");
+    }else{
+      res.redirect(403, "403");
     }
+  }else{
+    res.status(403).redirect("403");
   }
-  res.status(403).redirect("403");
 });
 
 app.post("/logout", (req, res) => {
@@ -182,7 +252,7 @@ app.get("/register", (req, res) => {
   let templateVars = {
     user_id: req.cookies.user_id
   };
-  res.render("register", templateVars)
+  res.render("register", templateVars);
 });
 
 app.post("/register", (req, res) => {
@@ -202,10 +272,13 @@ app.post("/register", (req, res) => {
       id: randId,
       email: email,
       password: password,
+      urls:[],
     }
+    usersToDisk();
     console.log(users)
-    res.cookie("user_id", randId)
-    let templateVars = {user_id: randId}
+
+    res.cookie("user_id", randId);
+    let templateVars = {user_id: randId};
     res.redirect("/urls/");
   }
 });
