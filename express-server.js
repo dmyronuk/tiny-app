@@ -19,7 +19,7 @@ app.set("view engine", "ejs");
 //     id: "userRandomID",
 //     email: "user@example.com",
 //     password: "purple-monkey-dinosaur",
-//     urls: []
+//     urls: ["TaEMFI"]
 //   },
 //  "user2RandomID": {
 //     id: "user2RandomID",
@@ -34,6 +34,11 @@ app.set("view engine", "ejs");
 //     urls: ["b2xVn2", "9sm5xK"]
 //   }
 // }
+
+// const urlDatabase = {
+//   "b2xVn2": "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com"
+// };
 
 const generateRandomString = () => {
   let outStr = ""
@@ -87,6 +92,15 @@ const validatePassword = (database, user_id, password) => {
   return database[user_id]["password"] === password;
 };
 
+const urlExists = (urls, shortURL) => {
+  return Object.keys(urls).reduce((acc, cur) => {
+    if(cur === shortURL){
+      acc = true;
+    }
+    return acc;
+  }, false)
+};
+
 const urlBelongsToUser = (users, user_id, shortURL) => {
   let userObj = users[user_id];
   return userObj.urls.reduce((acc, elem) => {
@@ -115,10 +129,6 @@ const removeUserURL = (users, user_id, shortURL) => {
   })
 };
 
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
 
 app.get("/", (req, res) => {
   templateVars = {user_id: req.cookies.user_id};
@@ -156,7 +166,12 @@ app.get("/urls/new", (req, res) => {
   let templateVars = {
     user_id:req.cookies.user_id,
   }
-  res.render("urls_new", templateVars);
+
+  if(req.cookies.user_id){
+    res.render("urls_new", templateVars);
+  }else{
+    res.status(403).redirect("/login");
+  }
 });
 
 //post to create new short url
@@ -181,28 +196,41 @@ app.post("/urls/:id/delete", (req, res) => {
   let shortURL = req.params.id;
   let user_id = req.cookies.user_id;
 
+  let
+  //if url doesn't exist, 404 it
+  if(! urlExists(urlDatabase, shortURL)){
+    res.status(404).redirect("/404");
+
   //if user is logged in they can delete
-  if(user_id && urlBelongsToUser(users, user_id, shortURL)){
+  }else if(user_id && urlBelongsToUser(users, user_id, shortURL)){
     delete urlDatabase[shortURL];
     removeUserURL(users, user_id, shortURL);
     dbToDisk();
     usersToDisk();
     res.status(301).redirect("/urls/");
   }else{
-    let templateVars = {user_id: req.cookies.user_id};
-    res.status(403).redirect("403", templateVars);
+    res.status(403).redirect("/403");
   }
 });
 
 //Display single url info
 app.get("/urls/:id", (req, res) => {
+  let user_id = req.cookies.user_id;
+  let url_id = req.params.id;
 
   let templateVars = {
-    shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id],
-    user_id:req.cookies.user_id
+    shortURL: url_id,
+    longURL: urlDatabase[url_id],
+    user_id: user_id
   };
-  res.render("urls_show", templateVars);
+
+  if(! urlExists(urlDatabase, url_id)){
+    res.status(404).redirect("/404");
+  }else if(user_id && urlBelongsToUser(users, user_id, url_id)){
+    res.render("urls_show", templateVars);
+  }else{
+    res.status(403).redirect("/403")
+  }
 });
 
 //Edit existing url
