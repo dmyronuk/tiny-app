@@ -19,19 +19,37 @@ a{
   text-decoration:none;
 }
 
+#greeting{
+  text-align:center;
+}
+
+#greeting-title{
+  font-size:50px;
+  font-weight:bold;
+
+}
+#greeting-link{
+  font-size:18px;
+  text-align:center;
+}
+
 .styled-button{
   color:white;
   background:#d62d20;
   border:none;
   border-radius:5px;
   margin:5px;
-  padding:5px 0px 5px 0px;
-  width:80px;
+  padding:5px 10px 5px 10px;
   font-size:16px;
 }
 
 #add-url-button{
   background:#0057e7;
+  border:none;
+  border-radius:5px;
+  margin:5px;
+  padding:5px 10px 5px 10px;
+  font-size:16px;
 }
 
 #add-url-button:hover{
