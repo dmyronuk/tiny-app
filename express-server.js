@@ -3,7 +3,7 @@ const app = express();
 const PORT = 8080;
 const fs = require("fs");
 const bodyParser = require("body-parser");
-const cookieParser = require('cookie-parser');
+const cookieSession = require('cookie-session')
 const bcrypt = require("bcrypt");
 
 //Decided to save the dbs to disk so that changes wouldn't be whiped every server restart
@@ -11,7 +11,11 @@ const users = require("./user-db.json")
 const urlDatabase = require("./app-db.json");
 
 app.use(bodyParser.urlencoded({extended: true}));
-app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ["supersecret"],
+  maxAge: 24 * 60 * 60 * 1000 // 24 hours
+}))
 app.use(express.static(__dirname + '/public'));
 app.set("view engine", "ejs");
 
@@ -132,23 +136,23 @@ const removeUserURL = (users, user_id, shortURL) => {
 };
 
 app.get("/", (req, res) => {
-  templateVars = {user_id: req.cookies.user_id};
+  templateVars = {user_id: req.session.user_id};
   res.render("home", templateVars);
 });
 
 app.get("/403", (req, res) => {
-  templateVars = {user_id: req.cookies.user_id};
+  templateVars = {user_id: req.session.user_id};
   res.render("403", templateVars);
 });
 
 app.get("/404", (req, res) => {
-  templateVars = {user_id: req.cookies.user_id};
+  templateVars = {user_id: req.session.user_id};
   res.render("404", templateVars);
 });
 
 //get list of urls
 app.get("/urls", (req, res) => {
-  let user_id = req.cookies.user_id;
+  let user_id = req.session.user_id;
   let urls = user_id ? getUserUrls(users, urlDatabase, user_id) : {};
   let urlsLength = Object.keys(urls).length;
   //Boolean used as a flag in the template to display a message
@@ -157,7 +161,7 @@ app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urls,
     userHasNoUrls: userHasNoUrls,
-    user_id: req.cookies.user_id
+    user_id: req.session.user_id
   };
   res.render("urls_index", templateVars);
 });
@@ -165,10 +169,10 @@ app.get("/urls", (req, res) => {
 //form to create new short urls
 app.get("/urls/new", (req, res) => {
   let templateVars = {
-    user_id:req.cookies.user_id,
+    user_id:req.session.user_id,
   }
 
-  if(req.cookies.user_id){
+  if(req.session.user_id){
     res.render("urls_new", templateVars);
   }else{
     res.status(403).redirect("/login");
@@ -178,7 +182,7 @@ app.get("/urls/new", (req, res) => {
 //post to create new short url
 app.post("/urls", (req, res) => {
   let shortURL = generateRandomString();
-  let user_id = req.cookies.user_id;
+  let user_id = req.session.user_id;
 
   if(user_id){
     users[user_id].urls.push(shortURL);
@@ -195,7 +199,7 @@ app.post("/urls", (req, res) => {
 //Add a POST route that removes a URL resource: POST /urls/:id/delete
 app.post("/urls/:id/delete", (req, res) => {
   let shortURL = req.params.id;
-  let user_id = req.cookies.user_id;
+  let user_id = req.session.user_id;
 
   let
   //if url doesn't exist, 404 it
@@ -216,7 +220,7 @@ app.post("/urls/:id/delete", (req, res) => {
 
 //Display single url info
 app.get("/urls/:id", (req, res) => {
-  let user_id = req.cookies.user_id;
+  let user_id = req.session.user_id;
   let url_id = req.params.id;
 
   let templateVars = {
@@ -238,8 +242,8 @@ app.get("/urls/:id", (req, res) => {
 app.post("/urls/:id", (req, res) => {
 
   //If user is logged in then they can edit
-  if(req.cookies.user_id){
-    if(urlBelongsToUser(users, req.cookies.user_id, req.params.id)){
+  if(req.session.user_id){
+    if(urlBelongsToUser(users, req.session.user_id, req.params.id)){
       let newLongURL = req.body.newLongURL;
       let shortURL = req.params.id;
       urlDatabase[shortURL] = newLongURL;
@@ -248,11 +252,11 @@ app.post("/urls/:id", (req, res) => {
       dbToDisk();
       res.status(301).redirect("/urls/");
     } else {
-      let templateVars = {user_id: req.cookies.user_id};
+      let templateVars = {user_id: req.session.user_id};
       res.status(403).redirect("/403");
     }
   } else {
-    let templateVars = {user_id: req.cookies.user_id};
+    let templateVars = {user_id: req.session.user_id};
     res.status(403).redirect("/403");
   }
 });
@@ -266,7 +270,7 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  let templateVars = {user_id: req.cookies.user_id};
+  let templateVars = {user_id: req.session.user_id};
   res.render("login", templateVars);
 });
 
@@ -277,7 +281,8 @@ app.post("/login", (req, res) => {
   if(user_id){
     let passwordIsValid = validatePassword(users, user_id, req.body.password);
     if(passwordIsValid){
-      res.cookie("user_id", user_id);
+      req.session.user_id = user_id
+      //res.cookie("user_id", user_id);
       res.redirect("/");
     }else{
       res.redirect(403, "403");
@@ -288,13 +293,13 @@ app.post("/login", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
+  req.session = null;
   res.redirect("/urls/");
 });
 
 app.get("/register", (req, res) => {
   let templateVars = {
-    user_id: req.cookies.user_id
+    user_id: req.session.user_id
   };
   res.render("register", templateVars);
 });
@@ -325,7 +330,8 @@ app.post("/register", (req, res) => {
     usersToDisk();
     console.log(users)
 
-    res.cookie("user_id", randId);
+    req.session.user_id = randId;
+    //res.cookie("user_id", randId);
     let templateVars = {user_id: randId};
     res.redirect("/urls/");
   }
