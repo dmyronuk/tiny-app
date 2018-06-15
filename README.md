@@ -5,6 +5,23 @@
 
 TinyApp is a mock REST API that allows users to generate shortened urls.  Built with Express.
 
+## Dependencies
+- Node.js
+- Express
+- EJS
+- bcrypt
+- body-parser
+- cookie-session
+- method-override
+
+## Getting Started
+```javascript npm install```
+```node express-server.js```
+
+## Screenshots
+!["Screenshot of url list"](https://github.com/dmyronuk/tiny-app/blob/master/screenshots/user-urls-list.png)
+!["Screenshot of url list"](https://github.com/dmyronuk/tiny-app/blob/master/screenshots/single-url-info.png)
+
 ## Notes
 
 - Due to an installation issue with the latest version of bcrypt, the app uses version 2.0.0
