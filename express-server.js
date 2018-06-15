@@ -146,7 +146,7 @@ const getUserUrls = (users, urlDatabase, user_id) => {
   let curUserObj = users[user_id];
   return curUserObj.urls.reduce((acc, cur) => {
     acc[cur] = urlDatabase[cur];
-    return acc;
+    return acc
   }, {})
 }
 
