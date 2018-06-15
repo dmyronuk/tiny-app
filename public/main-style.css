@@ -118,13 +118,24 @@ a{
   width:800px;
 }
 
+#urls-table td{
+
+}
+
+.url-hits-td{
+  text-align:center;
+}
+
+.url-unique-td{
+  text-align:center;
+}
+
 #arrow-icon{
   height:30px;
   width:30px;
 }
 
 .arrow-icon-td{
-  width:40px;
 }
 
 #shortURL {

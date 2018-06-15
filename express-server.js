@@ -208,7 +208,10 @@ app.get("/urls", (req, res) => {
   //Boolean used as a flag in the template to display a message
   let userHasNoUrls = urlsLength === 0;
 
+  //to get the app running we're passing the entire pageview object into the template
+  //which is impractical when the database is large - future updates will modify this behavior
   let templateVars = {
+    pageviews:pageviews,
     urls: urls,
     userHasNoUrls: userHasNoUrls,
     user_id: req.session.user_id,
