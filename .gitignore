@@ -3,3 +3,4 @@ app-db.json
 notes.txt
 tiny-app.sublime-workspace
 createJSON.js
+.eslintrc.js
