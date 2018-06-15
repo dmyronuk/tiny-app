@@ -6,16 +6,17 @@
   <body>
     <% include ./partials/_header.ejs %>
     <div id="main-container-mid">
+
       <div>
         <table>
           <tr>
             <th class="urls-show-th">
-              <%- `<a class="urls-show-big-link" href=/u/${shortURL}>ShortURL: <span class="bold-url">${shortURL}</span></a>` %>
+              <a class="urls-show-big-link" href="/u/<%= url_id %>"><%= url_id %><span class="bold-url"><% url_id %></span></a>
             </th>
           </tr>
           <tr>
             <td>
-              <form class="url-show-form" action="/urls/<%- shortURL %>?_method=PUT" method="POST">
+              <form class="url-show-form" action="/urls/<%- url_id %>?_method=PUT" method="POST">
                 <label class="url-show-label" for="newLongURL" class="hidden-label">Enter a new URL:</label>
                 <input id="newLongURL" type="text" name="newLongURL" placeholder="<%- longURL %>">
                 <input type="submit" class="styled-button" value="Update">
@@ -24,6 +25,29 @@
           </tr>
         </table>
       </div>
+
+      <div id="analytics-container">
+        <div id="analytics-mid">
+          <div>Pageviews: <%= url_tracker.hits.length %></div>
+          <div>Unique Visitors: <%= url_tracker.uniqueVisitors %></div>
+
+          <% if(url_tracker.hits.length > 0){ %>
+            <table id="analytics-table">
+              <tr>
+                <th class="analytics-table-heading">Visitor Id</th>
+                <th class="analytics-table-heading">Timestamp</th>
+              </tr>
+              <% url_tracker.hits.forEach((elem) => { %>
+                <tr>
+                  <td><%= elem.visitor_id %></td>
+                  <td class="timestamp-td"><%= elem.timestamp %></td>
+                </tr>
+              <% }); %>
+            </table>
+          <% } %>
+        </div>
+      </div>
+
     </div>
   </body>
 </html>

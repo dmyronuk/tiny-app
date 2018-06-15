@@ -11,6 +11,10 @@ const methodOverride = require("method-override");
 const users = require("./user-db.json");
 const urlDatabase = require("./app-db.json");
 
+
+//Pageviews are not persistent - recreated every server restart
+const pageviews = buildPageviewDB();
+
 app.use(methodOverride('_method'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieSession({
@@ -20,6 +24,8 @@ app.use(cookieSession({
 }))
 app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
+
+
 
 // const users = {
 //   "userRandomID": {
@@ -46,6 +52,49 @@ app.set("view engine", "ejs");
 //   "b2xVn2": "http://www.lighthouselabs.ca",
 //   "9sm5xK": "http://www.google.com"
 // };
+
+function createNewPageviewTracker(){
+  let newTracker = {
+    visitor_ids: [],
+    hits: [],
+    uniqueVisitors: 0
+  }
+  return newTracker;
+};
+
+function buildPageviewDB(){
+  let urlKeys = Object.keys(urlDatabase);
+  return urlKeys.reduce((acc, cur) => {
+    acc[cur] = createNewPageviewTracker();
+    return acc;
+  }, {})
+};
+
+const visitorIdExists = (pageviews, url_id, visitor_id) => {
+  return pageviews[url_id].visitor_ids.reduce((acc, cur) => {
+    if(cur === visitor_id){
+      acc = true;
+    }
+    return acc;
+  }, false)
+};
+
+//tracker does not distinguish between registered users and unregistered users
+const updatePageviews = (pageviews, url_id, visitor_id) => {
+  console.log(pageviews, url_id, visitor_id)
+  let curPageviewObj = pageviews[url_id];
+  if(! visitorIdExists(pageviews, url_id, visitor_id)){
+    curPageviewObj.uniqueVisitors += 1;
+    curPageviewObj.visitor_ids.push(visitor_id);
+  }
+  let date = new Date();
+  let curTimestamp = date.toString();
+  let newPageviewEntry = {
+    timestamp: curTimestamp,
+    visitor_id: visitor_id,
+  }
+  curPageviewObj.hits.push(newPageviewEntry);
+};
 
 const generateRandomString = () => {
   let outStr = ""
@@ -178,16 +227,20 @@ app.get("/urls/new", (req, res) => {
 
 //post to create new short url
 app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString();
+  let url_id = generateRandomString();
   let user_id = req.session.user_id;
-  console.log(user_id)
 
   if(user_id){
-    users[user_id].urls.push(shortURL);
-    urlDatabase[shortURL] = req.body.longURL;
+    users[user_id].urls.push(url_id);
+    urlDatabase[url_id] = req.body.longURL;
     dbToDisk();
     usersToDisk();
-    var redirectURL = `http://localhost:8080/urls/${shortURL}`;
+
+    //push add new tracker object to pageviews object
+    let newTrackerObj = createNewPageviewTracker();
+    pageviews[url_id] = newTrackerObj;
+
+    let redirectURL = `http://localhost:8080/urls/${url_id}`;
     res.redirect(redirectURL);
   }else{
     res.status(403).redirect("/login");
@@ -218,21 +271,27 @@ app.delete("/urls/:id/delete", (req, res) => {
 
 //Display single url info
 app.get("/urls/:id", (req, res) => {
-  let user_id = req.session.user_id;
   let url_id = req.params.id;
 
-  let templateVars = {
-    shortURL: url_id,
-    longURL: urlDatabase[url_id],
-    user_id: user_id
-  };
-
+  //url_id not found
   if(! urlExists(urlDatabase, url_id)){
     res.status(404).redirect("/404");
-  }else if(user_id && urlBelongsToUser(users, user_id, url_id)){
-    res.render("urls_show", templateVars);
+
+  //url_id exists
   }else{
-    res.status(403).redirect("/403")
+    let user_id = req.session.user_id;
+    let templateVars = {
+      url_id: url_id,
+      longURL: urlDatabase[url_id],
+      user_id: user_id,
+      url_tracker: pageviews[url_id],
+    };
+
+    if(user_id && urlBelongsToUser(users, user_id, url_id)){
+      res.render("urls_show", templateVars);
+    }else{
+      res.status(403).redirect("/403")
+    }
   }
 });
 
@@ -260,11 +319,32 @@ app.put("/urls/:id", (req, res) => {
 });
 
 //redirects short url to long url
-app.get("/u/:shortURL", (req, res) => {
-  let shortURL = req.params.shortURL;
-  let longURL = urlDatabase[shortURL];
-  res.status(301);
-  res.redirect(longURL);
+app.get("/u/:url_id", (req, res) => {
+
+  let url_id = req.params.url_id;
+
+  //first check to make sure short url actually exists
+  if(urlExists(urlDatabase, url_id )){
+    let user_id = req.session.user_id;
+
+    //if tracking cookie has not been set
+    if(! req.session.tracker_id){
+      //if the user is already logged in, use their id as the tracker
+      if(user_id){
+        req.session.tracker_id = user_id;
+      //else create a new random tracker_id
+      }else{
+        req.session.tracker_id = generateRandomString();
+      }
+    }
+
+    let longURL = urlDatabase[url_id];
+    updatePageviews(pageviews, url_id, req.session.tracker_id);
+    res.status(301);
+    res.redirect(longURL);
+  }else{
+    res.status(404).redirect("/404");
+  }
 });
 
 app.get("/login", (req, res) => {
@@ -326,7 +406,6 @@ app.post("/register", (req, res) => {
       urls:[],
     }
     usersToDisk();
-    console.log(users)
 
     req.session.user_id = randId;
     //res.cookie("user_id", randId);
@@ -337,5 +416,7 @@ app.post("/register", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
+  console.log(urlDatabase)
+  console.log(pageviews)
 });
 
