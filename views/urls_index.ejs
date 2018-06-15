@@ -36,12 +36,24 @@
         </div>
 
       <% } else if(user_id){ %>
-        <table>
+        <table id="urls-table">
+            <tr>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th class="url-hits-td">Hits</th>
+              <th class="url-unique-td">Unique</th>
+              <th></th>
+              <th></th>
+            </tr>
+
           <% Object.keys(urls).forEach(url => { %>
             <tr>
-              <td><%= url %></td>
+              <td class="url-id"><%= url %></td>
               <td class="arrow-icon-td"><img id="arrow-icon" src="/arrow.png"/></td>
               <td><a href=/u/<%= url %>><%= urls[url] %></a></td>
+              <td class="url-hits-td"><%= pageviews[url].hits.length %></td>
+              <td class="url-unique-td"><%= pageviews[url].uniqueVisitors %></td>
               <td class="edit-td"><%- `<a href=/urls/${url}>Edit</a>` %></td>
               <td>
                   <form action="/urls/<%= url %>/delete?_method=DELETE"" method="POST">
@@ -53,6 +65,8 @@
 
           <% }); %>
             <tr>
+              <td></td>
+              <td></td>
               <td></td>
               <td></td>
               <td></td>
