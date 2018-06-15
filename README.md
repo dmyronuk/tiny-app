@@ -15,7 +15,8 @@ TinyApp is a mock REST API that allows users to generate shortened urls.  Built 
 - method-override
 
 ## Getting Started
-```javascript npm install
+```javascript
+npm install
 node express-server.js
 ```
 
