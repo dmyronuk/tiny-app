@@ -25,34 +25,6 @@ app.use(cookieSession({
 app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
 
-
-
-// const users = {
-//   "userRandomID": {
-//     id: "userRandomID",
-//     email: "user@example.com",
-//     password: "$2b$10$fxrcS0SsOrsaRwxxgN6s/Os0obNAXHlIHuLh9gLr3scGl2tBL4yj",
-//     urls: ["TaEMFI"]
-//   },
-//  "user2RandomID": {
-//     id: "user2RandomID",
-//     email: "user2@example.com",
-//     password: "$2b$10$xXa5UovQ1aalgdbOf61Kr.pnl1GCMQHimoRl4umMM.bfZjVFY1CJ",
-//     urls: []
-//   },
-//   "Walter": {
-//     id: "fakeId",
-//     email: "walter@disney.com",
-//     password: "$2b$10$5NK/M0274su8TXpwxMcdq.le5dfkYJiil59dWm6SGllrbQ3qlYTx2",
-//     urls: ["b2xVn2", "9sm5xK"]
-//   }
-// }
-
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
 function createNewPageviewTracker(){
   let newTracker = {
     visitor_ids: [],
@@ -81,7 +53,7 @@ const visitorIdExists = (pageviews, url_id, visitor_id) => {
 
 //tracker does not distinguish between registered users and unregistered users
 const updatePageviews = (pageviews, url_id, visitor_id) => {
-  console.log(pageviews, url_id, visitor_id)
+
   let curPageviewObj = pageviews[url_id];
   if(! visitorIdExists(pageviews, url_id, visitor_id)){
     curPageviewObj.uniqueVisitors += 1;
@@ -140,7 +112,6 @@ const getUserFromEmail = (database, email) => {
       return key
     }
   }
-  console.log("Error: email address not found")
 };
 
 const getEmailFromUser = (database, user_id) => {
@@ -157,14 +128,14 @@ const validatePassword = (database, user_id, plaintextPassword) => {
   return bcrypt.compareSync(plaintextPassword, hashedPassword);
 };
 
-const urlExists = (urls, shortURL) => {
-  return urls.hasOwnProperty(shortURL);
+const urlExists = (urls, url_id) => {
+  return urls.hasOwnProperty(url_id);
 };
 
-const urlBelongsToUser = (users, user_id, shortURL) => {
+const urlBelongsToUser = (users, user_id, url_id) => {
   let userObj = users[user_id];
   return userObj.urls.reduce((acc, elem) => {
-    if(elem === shortURL){
+    if(elem === url_id){
       acc = true;
     }
     return acc;
@@ -180,10 +151,10 @@ const getUserUrls = (users, urlDatabase, user_id) => {
 }
 
 //deletes the link between a user and a url
-const removeUserURL = (users, user_id, shortURL) => {
+const removeUserURL = (users, user_id, url_id) => {
   let urlArr = users[user_id]["urls"];
   urlArr.forEach((elem, i) => {
-    if(elem === shortURL){
+    if(elem === url_id){
       urlArr.splice(i, 1);
     }
   })
@@ -283,20 +254,19 @@ app.post("/urls", (req, res) => {
   }
 });
 
-//Add a POST route that removes a URL resource: POST /urls/:id/delete
-//Override as DELETE request method
+//Add a DELETE route that removes a URL resource: POST /urls/:id/delete
 app.delete("/urls/:id/delete", (req, res) => {
-  let shortURL = req.params.id;
+  let url_id = req.params.id;
   let user_id = req.session.user_id;
 
   //if url doesn't exist, 404 it
-  if(! urlExists(urlDatabase, shortURL)){
+  if(! urlExists(urlDatabase, url_id)){
     res.status(404).redirect("/404");
 
   //if user is logged in they can delete
-  }else if(user_id && urlBelongsToUser(users, user_id, shortURL)){
-    delete urlDatabase[shortURL];
-    removeUserURL(users, user_id, shortURL);
+  }else if(user_id && urlBelongsToUser(users, user_id, url_id)){
+    delete urlDatabase[url_id];
+    removeUserURL(users, user_id, url_id);
     dbToDisk();
     usersToDisk();
     res.status(301).redirect("/urls/");
@@ -309,13 +279,6 @@ app.delete("/urls/:id/delete", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let url_id = req.params.id;
   let user_id = req.session.user_id;
-
-  let templateVars = {
-    shortURL: url_id,
-    longURL: urlDatabase[url_id],
-    user_id: user_id,
-    email: getEmailFromUser(users, user_id)
-  };
 
   if(! urlExists(urlDatabase, url_id)){
     res.status(404).redirect("/404");
@@ -334,7 +297,6 @@ app.get("/urls/:id", (req, res) => {
     if(user_id && urlBelongsToUser(users, user_id, url_id)){
       res.render("urls_show", templateVars);
     }else{
-      console.log("hmmm I'm in /urls/:id")
       res.status(403).redirect("/403")
     }
   }
@@ -347,8 +309,8 @@ app.put("/urls/:id", (req, res) => {
   if(req.session.user_id){
     if(urlBelongsToUser(users, req.session.user_id, req.params.id)){
       let newLongURL = req.body.newLongURL;
-      let shortURL = req.params.id;
-      urlDatabase[shortURL] = newLongURL;
+      let url_id = req.params.id;
+      urlDatabase[url_id] = newLongURL;
 
       //update the urls but we don't need to update users on disk because the url_id is unchanged
       dbToDisk();
@@ -485,8 +447,5 @@ app.post("/register", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
-  console.log(urlDatabase)
-  console.log(pageviews)
-  console.log(users)
 });
 
