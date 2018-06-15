@@ -94,6 +94,14 @@ const getUserFromEmail = (database, email) => {
   console.log("Error: email address not found")
 };
 
+const getEmailFromUser = (database, user_id) => {
+  if(! user_id){
+    return null
+  }else{
+    return database[user_id].email;
+  }
+};
+
 //returns true if password is valid
 const validatePassword = (database, user_id, plaintextPassword) => {
   let hashedPassword = database[user_id]["password"];
@@ -133,17 +141,29 @@ const removeUserURL = (users, user_id, shortURL) => {
 };
 
 app.get("/", (req, res) => {
-  templateVars = {user_id: req.session.user_id};
+  let user_id = req.session.user_id;
+  templateVars = {
+    user_id: req.session.user_id,
+    email: getEmailFromUser(users, user_id)
+  };
   res.render("home", templateVars);
 });
 
 app.get("/403", (req, res) => {
-  templateVars = {user_id: req.session.user_id};
+  let user_id = req.session.user_id,
+  templateVars = {
+    user_id: user_id,
+    email: getEmailFromUser(users, user_id)
+  };
   res.render("403", templateVars);
 });
 
 app.get("/404", (req, res) => {
-  templateVars = {user_id: req.session.user_id};
+  let user_id = req.session.user_id,
+  templateVars = {
+    user_id: user_id,
+    email: getEmailFromUser(users, user_id)
+  };
   res.render("404", templateVars);
 });
 
@@ -158,15 +178,18 @@ app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urls,
     userHasNoUrls: userHasNoUrls,
-    user_id: req.session.user_id
+    user_id: req.session.user_id,
+    email: getEmailFromUser(users, user_id)
   };
   res.render("urls_index", templateVars);
 });
 
 //form to create new short urls
 app.get("/urls/new", (req, res) => {
+  let user_id = req.session.user_id;
   let templateVars = {
-    user_id:req.session.user_id,
+    user_id:user_id,
+    email: getEmailFromUser(users, user_id)
   }
 
   if(req.session.user_id){
@@ -224,7 +247,8 @@ app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: url_id,
     longURL: urlDatabase[url_id],
-    user_id: user_id
+    user_id: user_id,
+    email: getEmailFromUser(users, user_id)
   };
 
   if(! urlExists(urlDatabase, url_id)){
@@ -269,7 +293,11 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  let templateVars = {user_id: req.session.user_id};
+  let user_id = req.session.user_id
+  let templateVars = {
+    email: getEmailFromUser(users, user_id),
+    user_id: user_id
+  };
   res.render("login", templateVars);
 });
 
@@ -300,10 +328,12 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
+  let user_id = req.session.user_id;
   let templateVars = {
-    user_id: req.session.user_id
+    user_id: user_id,
+    email: getEmailFromUser(users, user_id)
   };
-  res.render("/register", templateVars);
+  res.render("register", templateVars);
 });
 
 app.post("/register", (req, res) => {

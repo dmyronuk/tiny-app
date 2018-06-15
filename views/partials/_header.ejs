@@ -1,7 +1,12 @@
 <div id="top-bar">
   <div id = "login-info">
     <% if(user_id){%>
-      Signed in as <%= user_id %>
+      <div>
+        Signed in as <%= user_id %>
+      </div>
+      <div>
+        <%= email %>
+      </div>
     <% } %>
   </div>
 
