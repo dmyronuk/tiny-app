@@ -71,7 +71,7 @@ const updatePageviews = (pageviews, url_id, visitor_id) => {
 const generateRandomString = () => {
   let outStr = ""
   while(outStr.length < 6){
-    let randCharCode = Math.floor(Math.random() * 122 + 48)
+    let randCharCode = Math.floor(Math.random() * 122 + 48);
     //number
     if(randCharCode < 58){
       outStr += String.fromCharCode(randCharCode);
@@ -109,14 +109,14 @@ const emailAlreadyExists = (database, newAddress) => {
 const getUserFromEmail = (database, email) => {
   for(key in database){
     if(database[key]["email"] === email){
-      return key
+      return key;
     }
   }
 };
 
 const getEmailFromUser = (database, user_id) => {
   if(! user_id){
-    return null
+    return null;
   }else{
     return database[user_id].email;
   }
@@ -146,7 +146,7 @@ const getUserUrls = (users, urlDatabase, user_id) => {
   let curUserObj = users[user_id];
   return curUserObj.urls.reduce((acc, cur) => {
     acc[cur] = urlDatabase[cur];
-    return acc
+    return acc;
   }, {})
 }
 
@@ -374,7 +374,7 @@ app.post("/login", (req, res) => {
   if(user_id){
     let passwordIsValid = validatePassword(users, user_id, req.body.password);
     if(passwordIsValid){
-      req.session.user_id = user_id
+      req.session.user_id = user_id;
       //res.cookie("user_id", user_id);
       res.redirect("/");
 
@@ -420,7 +420,7 @@ app.post("/register", (req, res) => {
 
   //email or password are missing
   if(!email || !password){
-    req.session.error = "Email address and password are required"
+    req.session.error = "Email address and password are required";
     res.status(400).redirect("/register");
 
   //email already exists in database
