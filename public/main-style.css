@@ -221,7 +221,13 @@ a{
   font-weight:bold;
 }
 
+#register-error{
+  width:100%;
+  text-align:center;
+}
+
 .error-div{
   display:block;
   margin-top:5px
 }
+

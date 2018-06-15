@@ -195,7 +195,20 @@ app.get("/", (req, res) => {
     user_id: req.session.user_id,
     email: getEmailFromUser(users, user_id)
   };
-  res.render("home", templateVars);
+  if(user_id){
+    res.status(301).redirect("/urls");
+  }else{
+    res.status(301).redirect("/login");
+  }
+});
+
+app.get("/401", (req, res) => {
+  let user_id = req.session.user_id,
+  templateVars = {
+    user_id: user_id,
+    email: getEmailFromUser(users, user_id)
+  };
+  res.render("401", templateVars);
 });
 
 app.get("/403", (req, res) => {
@@ -295,6 +308,7 @@ app.delete("/urls/:id/delete", (req, res) => {
 //Display single url info
 app.get("/urls/:id", (req, res) => {
   let url_id = req.params.id;
+  let user_id = req.session.user_id;
 
   let templateVars = {
     shortURL: url_id,
@@ -314,11 +328,13 @@ app.get("/urls/:id", (req, res) => {
       longURL: urlDatabase[url_id],
       user_id: user_id,
       url_tracker: pageviews[url_id],
+      email: getEmailFromUser(users, user_id)
     };
 
     if(user_id && urlBelongsToUser(users, user_id, url_id)){
       res.render("urls_show", templateVars);
     }else{
+      console.log("hmmm I'm in /urls/:id")
       res.status(403).redirect("/403")
     }
   }
@@ -399,11 +415,11 @@ app.post("/login", (req, res) => {
 
     //invalid password
     }else{
-      res.status(401).redirect("/login");
+      res.status(401).redirect("/401");
     }
   //user does not exist
   }else{
-    res.status(401).redirect("/login");
+    res.status(401).redirect("/401");
   }
 });
 
@@ -413,12 +429,24 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
+  //if we set and error cookie at POST /register save it to a variable then destory it
+  var error;
+  if(req.session.error){
+    error = req.session.error;
+    req.session.error = null;
+  }
+
   let user_id = req.session.user_id;
   let templateVars = {
+    error:error,
     user_id: user_id,
     email: getEmailFromUser(users, user_id)
   };
-  res.render("register", templateVars);
+  if(user_id){
+    res.redirect("/urls");
+  }else{
+    res.render("register", templateVars);
+  }
 });
 
 app.post("/register", (req, res) => {
@@ -427,10 +455,12 @@ app.post("/register", (req, res) => {
 
   //email or password are missing
   if(!email || !password){
+    req.session.error = "Email address and password are required"
     res.status(400).redirect("/register");
 
   //email already exists in database
   }else if(emailAlreadyExists(users, email)){
+    req.session.error = "Email already exists :(";
     res.status(403).redirect("/register");
 
   //new user passes validators
@@ -457,5 +487,6 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
   console.log(urlDatabase)
   console.log(pageviews)
+  console.log(users)
 });
 

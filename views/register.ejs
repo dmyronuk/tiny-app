@@ -21,6 +21,10 @@
           <input type="submit" id="register-button" class="styled-button" value="Register">
         </form>
       <% } %>
+
+      <% if(error) { %>
+        <div id="register-error"><%= error %></div>
+      <% } %>
     </div>
   </body>
 </html>
